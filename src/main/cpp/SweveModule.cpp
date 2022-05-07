@@ -1,67 +1,67 @@
 #include "SwerveModule.h"
 using namespace frc;
-SwerveModule::SwerveModule(int RotatorPort, int DrivePort, int EncoderPort1, int EncoderPort2, bool reverseDirection):
+SwerveModule::SwerveModule(int RotatorPort, int DrivePort, int EncoderPort1, bool reverseDirection):
 RotatorMotor(RotatorPort),
 DriveMotor(DrivePort),
-RotatorEncoder(EncoderPort1, EncoderPort2,reverseDirection),
+RotatorEncoder(EncoderPort1,360,0),
 pid(KP, KI, KD)
 {
+	
 	correction = 0.0;
-	RotatorEncoder.Reset();
-	RotatorEncoder.SetDistancePerPulse(0.8692152937);
+	//Limits PID range -pi and pi(find out why these numbers are specified(read on internet))
+	turningPID.EnableContinuousInput(-M_PI*1_rad,M_PI*1_rad);
+	//RotatorEncoder.Reset();
+	//RotatorEncoder.SetDistancePerPulse(0.8692152937);
 	MotorIsForward = true;
 }
-void SwerveModule::ResetEncoder()
-{
-	RotatorEncoder.Reset();
-}
+//ANGLE RETURNED IN RADIANS!!!!!!!!!!!!!!!!
 double SwerveModule::GetCurrentPosition(){
-	double angle = fmod((fmod(RotatorEncoder.GetDistance() , 360.0) + 360.0) , 360.0);
+	double angle = RotatorEncoder.Get();
 	if (angle == 0.0)
 		angle = 360.0;
-	return angle;
+	return angle*(M_PI/180);
 }
 
 double SwerveModule::GetTurningEncoderPosition(){
 	return RotatorEncoder.Get();
 }
 
-void SwerveModule::SetToVector(double speed, double angle,double throttle){
-	if(speed*throttle >= 0.1 && speed*throttle <= 1){
-		double TurningPower = pid.GetPID(SwerveModule::CalculateError(angle));
-		correction = pid.GetPID(SwerveModule::CalculateError(angle));
-		RotatorMotor.Set(TurningPower);
-	}
-	else{
-		RotatorMotor.Set(0.0);
-	}
+//Input to motor state
+void SwerveModule::SetToVector(frc::SwerveModuleState& state){
+	//Optimised state to stop from spinning more than pi/2 radians
+	auto optimizedstate = state.Optimize(state,(SwerveModule::GetCurrentPosition()*1_rad));
 
-	if(MotorIsForward && speed*throttle <= 1 && speed*throttle >= -1){
-		
-		DriveMotor.Set(speed*throttle);
-	}
-	else if(speed*throttle <= 1&& speed*throttle >= -1){
-		
-		DriveMotor.Set(-speed*throttle);
-	}
+	auto driveOut = (state.speed.value()*(1/(MAXSPEED)));
+
+	auto rotOut = turningPID.Calculate((SwerveModule::GetCurrentPosition()*1_rad),
+									   optimizedstate.angle.Radians());
+
+	//units::volt_t rotatorFF = rotatorFeedForward.Calculate(turningPID.GetSetpoint().velocity);
+	//setpointvelocity = (turningPID.GetSetpoint().velocity).value();
+	
+	units::volt_t rot =(units::volt_t{rotOut}/(MAXVOLTAGE*1_V));
+	DriveMotor.Set(driveOut);
+	RotatorMotor.SetVoltage(rot);
 }
+//Not used, currently using Optimize function to avoid spining over 90 degrees 
+/*
 double SwerveModule::CalculateError(double TargetAngle){
 
-	double CDist = fmod((GetCurrentPosition()+(360.0-TargetAngle)),360.0);
+	double CDist = fmod((GetCurrentPosition()+((2*M_PI)-TargetAngle)),(2*M_PI));
 	double error;
 	double target = TargetAngle;
 	if (target == 0)
-		target = 360.0;
-	if(CDist <= 90.0){
+		target = (2*M_PI);
+	if(CDist <= (M_PI_2)){
 		error = CDist;
 		MotorIsForward = true;
 	}
-	else if(CDist <= 270.0){
+	else if(CDist <= (3*M_PI_2)){
 		error = CDist-180.0;
 		MotorIsForward = false;
 	}
-	else if(CDist <= 360.0){
-		error = CDist - 360.0;
+	else if(CDist <=  (2*M_PI)){
+		error = CDist -  (2*M_PI);
 		MotorIsForward = true;
 	}
 	else{
@@ -70,4 +70,4 @@ double SwerveModule::CalculateError(double TargetAngle){
 
 	return error;
 }
-
+*/

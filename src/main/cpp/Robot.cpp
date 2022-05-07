@@ -8,16 +8,15 @@
 
 #include <frc/smartdashboard/SmartDashboard.h>
 
+
 Robot::Robot():
-  RFMod(4, 0, 0, 1, false),
-	LFMod(6, 2, 6, 7, false),
-	RBMod(5, 1, 2, 3, false),
-	LBMod(7, 3, 4, 5, false),
-  StickL(0),
-  StickR(1),
+  RFMod(7, 6, 7, false),
+	LFMod(5, 4, 5, false),
+	RBMod(1, 0, 1, true),
+	LBMod(3, 2, 3, true),
   gyro(),
   //Multiplied by 1 degree to transfer the Unit to the non Unit
-  KinematicsAndOdometry(0_m,0_m,0_deg, (gyro.GetAngle()*1_deg))
+  KinematicsAndOdometry(0_m,0_m,0_rad, (gyro.GetAngle()*1_rad))
   {
     dash -> init();
   }
@@ -74,25 +73,53 @@ void Robot::TeleopInit() {
   gyro.Reset();
   FieldOriented = true;
   throttle = 1;
+  
 }
 
 void Robot::TeleopPeriodic() {
+  //Apperently Xbox inputs or reversed compared to joystick
+  //Note Deadband in Xbox controller
+  const auto xSpeed = -xspeedLimiter.Calculate(frc::ApplyDeadband(controller.GetLeftX(),0.02)*MAXSPEED);
+  const auto ySpeed = -yspeedLimiter.Calculate(frc::ApplyDeadband(controller.GetLeftY(),0.02)*MAXSPEED);
+  const auto rotSpeed = -rotspeedLimiter.Calculate(frc::ApplyDeadband(controller.GetRightX(),0.02)*MAXOmega);
  
-  KinematicsAndOdometry.SwerveOdometryGetPose(gyro.GetAngle()*1_deg);
+  KinematicsAndOdometry.SwerveOdometryGetPose(gyro.GetAngle()*1_rad);
   if(FieldOriented){
-  KinematicsAndOdometry.FieldRelativeKinematics((StickL.GetX()*velocityConstant*1_mps),(StickL.GetY()*velocityConstant*1_mps),
-                                               (StickR.GetX()*rotationConstant*1_rad_per_s),(gyro.GetAngle()*1_deg));
+  KinematicsAndOdometry.FieldRelativeKinematics((xSpeed*1_mps),(ySpeed*1_mps),
+                                               (rotSpeed*1_rad_per_s),(gyro.GetAngle()*1_rad));
   }else{
-  KinematicsAndOdometry.notFieldRelativeKinematics((StickL.GetX()*velocityConstant*1_mps),(StickL.GetY()*velocityConstant*1_mps),(StickR.GetX()*rotationConstant*1_rad_per_s));
+  KinematicsAndOdometry.notFieldRelativeKinematics((10_mps),(10_mps),(4_rad_per_s));
+  //KinematicsAndOdometry.notFieldRelativeKinematics((StickL.GetX()*velocityConstant*1_mps),(StickL.GetY()*velocityConstant*1_mps),(0_rad_per_s));
   }
-  LFMod.SetToVector(KinematicsAndOdometry.motorDataMatrix[0][0],KinematicsAndOdometry.motorDataMatrix[0][1],throttle);
-  RFMod.SetToVector(KinematicsAndOdometry.motorDataMatrix[1][0],KinematicsAndOdometry.motorDataMatrix[1][1],throttle);
-  LBMod.SetToVector(KinematicsAndOdometry.motorDataMatrix[2][0],KinematicsAndOdometry.motorDataMatrix[2][1],throttle);
-  RBMod.SetToVector(KinematicsAndOdometry.motorDataMatrix[3][0],KinematicsAndOdometry.motorDataMatrix[3][1],throttle);
-
+  /*
+  dash->PutNumber("LeftFF",LFMod.setpointvelocity);
+  dash->PutNumber("LeftFMotorSpeed",KinematicsAndOdometry.motorDataMatrix[0][0]);
+   dash->PutNumber("LeftFMotorAngle",KinematicsAndOdometry.motorDataMatrix[0][1]);
+   dash->PutNumber("RotVal",rotSpeed);
+   dash->PutNumber("RotationIn",LFMod.rotate);
+   dash->PutNumber("XVal",xSpeed);
+   dash->PutNumber("YVal",ySpeed);
+   */
+  //dash->PutNumber("EncoderAngle",LBMod.GetTurningEncoderPosition());
+  dash->PutNumber("LFPos",LFMod.GetCurrentPosition());
+  dash->PutNumber("LBPos",LBMod.GetCurrentPosition());
+  dash->PutNumber("RBPos",RBMod.GetCurrentPosition());
+  dash->PutNumber("RFPos",RFMod.GetCurrentPosition());
+  
+  //dash->PutNumber("angle",KinematicsAndOdometry.frontLeft.angle.Radians().value());
+  
+  LFMod.SetToVector(KinematicsAndOdometry.frontLeft);
+ RFMod.SetToVector(KinematicsAndOdometry.frontRight);
+  LBMod.SetToVector(KinematicsAndOdometry.backLeft);
+  RBMod.SetToVector(KinematicsAndOdometry.backRight);
+/*
   dash -> PutNumber("DistanceX",KinematicsAndOdometry.PoseVector[0]);
+  dash -> PutNumber("LeftFrontDrive",LFMod.drive);
+  dash -> PutNumber("LeftFrontRotate",LFMod.rotate);
+  dash -> PutNumber("sf",KinematicsAndOdometry.motorDataMatrix[0][0]);
   dash -> PutNumber("DistanceY",KinematicsAndOdometry.PoseVector[1]);
   dash -> PutNumber("Angle",KinematicsAndOdometry.PoseVector[2]);
+  */
   
 }
 
