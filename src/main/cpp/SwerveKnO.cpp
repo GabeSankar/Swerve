@@ -12,10 +12,10 @@ odometry(kinematics, Rotation2d(gyroAngle), Pose2d(startingx, startingy,starting
 //Chassis objects
 
 //Relative Wheel positions to center(Correct Values Later)
-frontLeftLocation = Translation2d(34.25_m,34.25_m);
-frontRightLocation = Translation2d(34.25_m, -34.25_m);
-backLeftLocation = Translation2d(-34.25_m, 34.25_m);
-backRightLocation = Translation2d(-34.25_m, -34.25_m);
+frontLeftLocation = Translation2d(.3425_m,.3425_m);
+frontRightLocation = Translation2d(.3425_m, -.3425_m);
+backLeftLocation = Translation2d(-.3425_m, .3425_m);
+backRightLocation = Translation2d(-.3425_m, -.3425_m);
 
 }
 //Columns are in order as frontleft, frontright, backleft, backright and the row is in order of speed and angle
