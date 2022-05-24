@@ -8,7 +8,6 @@
 #include <frc/kinematics/SwerveDriveKinematics.h>
 #include <frc/geometry/Rotation2d.h>
 #include <frc/geometry/Pose2d.h>
-#include <frc/controller/PIDController.h>
 #include <cmath>
 #include <frc/controller/ProfiledPIDController.h>
 #include <units/angle.h>
@@ -23,7 +22,8 @@
 #include "Constants.h"
 #include <frc/AnalogPotentiometer.h>
 #include <frc/AnalogInput.h>
-
+#include <frc/controller/PIDController.h>
+#include <bits/stdc++.h>
 
 using namespace frc;
 class SwerveModule{
@@ -32,8 +32,7 @@ private:
 	Spark DriveMotor;
 	AnalogPotentiometer RotatorEncoder;
 	//AnalogInput analogIn;
-	PID pid;
-	
+	PIDController pidController;
 	bool MotorIsForward;
 	double correction;
 	void SetDrivePower(double power);
@@ -51,9 +50,9 @@ public:
 	double GetPEIDCorrection();
 	void SetToVector(frc::SwerveModuleState& state);
 	//Using Provided PID controllers take note to change later
-  	frc2::PIDController DrivePID{KDp,KDi,KDd};
-	frc::ProfiledPIDController<units::radians> turningPID{KRp,KRi,KRd,
-	  													{MaxOmegaPerWheel*1_rad_per_s,MaxAlphaPerWheel*1_rad_per_s/1_s}};
+  	//frc2::PIDController DrivePID{KDp,KDi,KDd};
+	//frc::ProfiledPIDController<units::radians> turningPID{KRp,KRi,KRd,
+	 // 													{MaxOmegaPerWheel*1_rad_per_s,MaxAlphaPerWheel*1_rad_per_s/1_s}};
 	
 	//FeedForward fix values
 	frc::SimpleMotorFeedforward<units::meters> driveFF{1_V,3_V/1_mps};

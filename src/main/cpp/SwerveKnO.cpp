@@ -12,10 +12,10 @@ odometry(kinematics, Rotation2d(gyroAngle), Pose2d(startingx, startingy,starting
 //Chassis objects
 
 //Relative Wheel positions to center(Correct Values Later)
-frontLeftLocation = Translation2d(.3425_m,.3425_m);
-frontRightLocation = Translation2d(.3425_m, -.3425_m);
-backLeftLocation = Translation2d(-.3425_m, .3425_m);
-backRightLocation = Translation2d(-.3425_m, -.3425_m);
+frontLeftLocation = Translation2d(34.25_m,34.25_m);
+frontRightLocation = Translation2d(34.25_m, -34.25_m);
+backLeftLocation = Translation2d(-34.25_m, 34.25_m);
+backRightLocation = Translation2d(-34.25_m, -34.25_m);
 
 }
 //Columns are in order as frontleft, frontright, backleft, backright and the row is in order of speed and angle
@@ -39,6 +39,19 @@ void SwerveKnO::FieldRelativeKinematics(units::velocity::meters_per_second_t xsp
     backRight = br;
     
 
+    /*Updates global matrix NOTE: fix later and make more elegant*/
+    //Front Left
+    motorDataMatrix[0][0] = frontLeft.speed.value();
+    motorDataMatrix[0][1] = frontLeft.angle.Radians().value();
+    //Front Right
+    motorDataMatrix[1][0] = frontRight.speed.value();
+    motorDataMatrix[1][1] = frontRight.angle.Radians().value();
+    //Back Left
+    motorDataMatrix[2][0] = backLeft.speed.value();
+    motorDataMatrix[2][1] = backLeft.angle.Radians().value();
+    //Back Right
+    motorDataMatrix[3][0] = backRight.speed.value();
+    motorDataMatrix[3][1] = backRight.angle.Radians().value();
 }
 void SwerveKnO::notFieldRelativeKinematics(units::meters_per_second_t  xspeed, units::meters_per_second_t  yspeed, 
                                            units::radians_per_second_t angularVelocity)
@@ -57,7 +70,19 @@ void SwerveKnO::notFieldRelativeKinematics(units::meters_per_second_t  xspeed, u
     frontRight = fr;
     backLeft = bl;
     backRight = br;
-   
+    /*Updates global matrix NOTE: fix later and make more elegant*/
+    //Front Left
+    motorDataMatrix[0][0] = frontLeft.speed.value();
+    motorDataMatrix[0][1] = frontLeft.angle.Radians().value();
+    //Front Right
+    motorDataMatrix[1][0] = frontRight.speed.value();
+    motorDataMatrix[1][1] = frontRight.angle.Radians().value();
+    //Back Left
+    motorDataMatrix[2][0] = backLeft.speed.value();
+    motorDataMatrix[2][1] = backLeft.angle.Radians().value();
+    //Back Right
+    motorDataMatrix[3][0] = backRight.speed.value();
+    motorDataMatrix[3][1] = backRight.angle.Radians().value();
 }
 void SwerveKnO::SwerveOdometryGetPose(units::angle::radian_t gyroAngle)
 {

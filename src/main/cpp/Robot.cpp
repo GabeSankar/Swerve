@@ -10,10 +10,10 @@
 
 
 Robot::Robot():
-  RFMod(7, 6, 7, false),
-	LFMod(5, 4, 5, false),
-	RBMod(1, 0, 1, true),
-	LBMod(3, 2, 3, true),
+  RFMod(7, 6, 1, false),
+	LFMod(5, 4, 0, false),
+	RBMod(1, 0, 3, true),
+	LBMod(3, 2, 2, true),
   gyro(),
   //Multiplied by 1 degree to transfer the Unit to the non Unit
   KinematicsAndOdometry(0_m,0_m,0_rad, (gyro.GetAngle()*1_rad))
@@ -91,35 +91,32 @@ void Robot::TeleopPeriodic() {
   KinematicsAndOdometry.notFieldRelativeKinematics((10_mps),(10_mps),(4_rad_per_s));
   //KinematicsAndOdometry.notFieldRelativeKinematics((StickL.GetX()*velocityConstant*1_mps),(StickL.GetY()*velocityConstant*1_mps),(0_rad_per_s));
   }
-  /*
-  dash->PutNumber("LeftFF",LFMod.setpointvelocity);
-  dash->PutNumber("LeftFMotorSpeed",KinematicsAndOdometry.motorDataMatrix[0][0]);
-   dash->PutNumber("LeftFMotorAngle",KinematicsAndOdometry.motorDataMatrix[0][1]);
-   dash->PutNumber("RotVal",rotSpeed);
-   dash->PutNumber("RotationIn",LFMod.rotate);
-   dash->PutNumber("XVal",xSpeed);
-   dash->PutNumber("YVal",ySpeed);
-   */
+  //dash->PutNumber("Desired LF",KinematicsAndOdometry.motorDataMatrix[0][1]);
+   //dash->PutNumber("LFPos",LFMod.GetCurrentPosition());
+
+  //dash->PutNumber("LeftFMotorSpeed",KinematicsAndOdometry.motorDataMatrix[0][0]);
+   //dash->PutNumber("LeftFMotorAngle",KinematicsAndOdometry.motorDataMatrix[0][1]);
+   //dash->PutNumber("RotVal",rotSpeed);
+   //dash->PutNumber("RotationIn",LFMod.rotate);
+   //dash->PutNumber("XVal",xSpeed);
+   //dash->PutNumber("YVal",ySpeed);
   //dash->PutNumber("EncoderAngle",LBMod.GetTurningEncoderPosition());
   dash->PutNumber("LFPos",LFMod.GetCurrentPosition());
   dash->PutNumber("LBPos",LBMod.GetCurrentPosition());
   dash->PutNumber("RBPos",RBMod.GetCurrentPosition());
   dash->PutNumber("RFPos",RFMod.GetCurrentPosition());
-  
   //dash->PutNumber("angle",KinematicsAndOdometry.frontLeft.angle.Radians().value());
-  
   LFMod.SetToVector(KinematicsAndOdometry.frontLeft);
- RFMod.SetToVector(KinematicsAndOdometry.frontRight);
+  RFMod.SetToVector(KinematicsAndOdometry.frontRight);
   LBMod.SetToVector(KinematicsAndOdometry.backLeft);
   RBMod.SetToVector(KinematicsAndOdometry.backRight);
-/*
-  dash -> PutNumber("DistanceX",KinematicsAndOdometry.PoseVector[0]);
-  dash -> PutNumber("LeftFrontDrive",LFMod.drive);
-  dash -> PutNumber("LeftFrontRotate",LFMod.rotate);
-  dash -> PutNumber("sf",KinematicsAndOdometry.motorDataMatrix[0][0]);
-  dash -> PutNumber("DistanceY",KinematicsAndOdometry.PoseVector[1]);
-  dash -> PutNumber("Angle",KinematicsAndOdometry.PoseVector[2]);
-  */
+
+ // dash -> PutNumber("DistanceX",KinematicsAndOdometry.PoseVector[0]);
+  //dash -> PutNumber("voltage",LFMod.drive);
+  //dash -> PutNumber("LeftFrontRotate",LFMod.rotate);
+  //dash -> PutNumber("sf",KinematicsAndOdometry.motorDataMatrix[0][0]);
+  //dash -> PutNumber("DistanceY",KinematicsAndOdometry.PoseVector[1]);
+  //dash -> PutNumber("Angle",KinematicsAndOdometry.PoseVector[2]);
   
 }
 

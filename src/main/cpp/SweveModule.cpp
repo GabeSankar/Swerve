@@ -4,14 +4,14 @@ SwerveModule::SwerveModule(int RotatorPort, int DrivePort, int EncoderPort1, boo
 RotatorMotor(RotatorPort),
 DriveMotor(DrivePort),
 RotatorEncoder(EncoderPort1,360,0),
-pid(KP, KI, KD)
+pidController(1,0,0)
+
 {
 	
 	correction = 0.0;
 	//Limits PID range -pi and pi(find out why these numbers are specified(read on internet))
-	turningPID.EnableContinuousInput(-M_PI*1_rad,M_PI*1_rad);
-	//RotatorEncoder.Reset();
-	//RotatorEncoder.SetDistancePerPulse(0.8692152937);
+	//Look over the range
+    pidController.EnableContinuousInput(-2*3.1415926,2*3.1415926);
 	MotorIsForward = true;
 }
 //ANGLE RETURNED IN RADIANS!!!!!!!!!!!!!!!!
@@ -30,18 +30,19 @@ double SwerveModule::GetTurningEncoderPosition(){
 void SwerveModule::SetToVector(frc::SwerveModuleState& state){
 	//Optimised state to stop from spinning more than pi/2 radians
 	auto optimizedstate = state.Optimize(state,(SwerveModule::GetCurrentPosition()*1_rad));
-
-	auto driveOut = (state.speed.value()*(1/(MAXSPEED)));
-
-	auto rotOut = turningPID.Calculate((SwerveModule::GetCurrentPosition()*1_rad),
-									   optimizedstate.angle.Radians());
-
-	//units::volt_t rotatorFF = rotatorFeedForward.Calculate(turningPID.GetSetpoint().velocity);
-	//setpointvelocity = (turningPID.GetSetpoint().velocity).value();
-	
-	units::volt_t rot =(units::volt_t{rotOut}/(MAXVOLTAGE*1_V));
+	auto driveOut = (state.speed*(1/(MAXSPEED*1_mps)));
+	//auto rotOut = turningPID.Calculate(SwerveModule::GetCurrentPosition()*1_rad);
+	double setpoint = state.angle.Radians().value()*(MAXVOLTAGE * 0.5) + (MAXVOLTAGE * 0.5); // Optimization offset can be calculated here.
+    if (setpoint < 0) {
+        setpoint = MAXVOLTAGE + setpoint;
+    }
+    if (setpoint > MAXVOLTAGE) {
+        setpoint = setpoint - MAXVOLTAGE;
+    }
+	double rot = std::clamp(pidController.Calculate(SwerveModule::GetCurrentPosition(), setpoint), -1.0, 1.0);
+   
 	DriveMotor.Set(driveOut);
-	RotatorMotor.SetVoltage(rot);
+	RotatorMotor.Set(rot);
 }
 //Not used, currently using Optimize function to avoid spining over 90 degrees 
 /*
